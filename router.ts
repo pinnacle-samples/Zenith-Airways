@@ -1,13 +1,17 @@
 import { Router, Request, Response } from 'express';
-import { RequestWithMessageEvent, TriggerPayload } from './lib/types';
+import { TriggerPayload } from './lib/types';
 import { agent } from './lib/agent';
 import { sessionManager } from './lib/session';
+import { rcsClient } from './lib/rcsClient';
 
 const flyEasyRouter = Router();
 
 flyEasyRouter.post('/', async (req: Request, res: Response) => {
   try {
-    const messageEvent = (req as RequestWithMessageEvent).messageEvent;
+    const messageEvent = await rcsClient.messages.process(req);
+    if (messageEvent.type !== 'MESSAGE.RECEIVED') {
+      return res.status(200).json({ message: 'No message found' });
+    }
     const message = messageEvent.message;
     const from = messageEvent.conversation.from;
 

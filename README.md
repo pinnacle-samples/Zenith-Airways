@@ -1,101 +1,132 @@
 # FlyEasy - Flight and Travel Assistant
 
-A comprehensive flight management chatbot powered by Pinnacle RCS that provides travelers with an interactive way to manage their flights, get boarding passes, upgrade seats, and receive real-time notifications.
+A comprehensive flight management RCS chatbot that provides travelers with an interactive way to manage their flights, get boarding passes, upgrade seats, and receive notifications through Rich Communication Services (RCS) messaging.
 
 ## Features
 
 ### Flight Management
-- **View My Flights**: Display all upcoming flights with detailed information including flight number, origin, destination, departure time, gate, and status
-- **Flight Status Updates**: Check real-time flight status with delay information
-- **Notifications**: Enable real-time notifications for flight status changes
+
+- View all upcoming flights with detailed information
+- Flight number, origin, destination, departure time, gate, and status
+- Real-time flight status updates with delay information
+- Enable notifications for flight status changes
 
 ### Boarding Passes
-- **Digital Boarding Pass**: Get instant access to your boarding pass with QR code
-- **Seat Information**: View assigned seat and boarding group details
-- **Gate and Boarding Time**: Quick access to gate number and boarding time
+
+- Digital boarding pass with QR code
+- Seat information and boarding group details
+- Quick access to gate number and boarding time
 
 ### Flight Upgrades
-- **Upgrade Bidding System**: Place bids for Premium Economy, Business Class, or First Class upgrades
-- **Interactive Bidding**: Text-based bid entry with validation
-- **Multiple Upgrade Options**: Compare different upgrade classes with pricing and amenities
-- **Bid Tracking**: Track your current bids across different flights and upgrade classes
+
+- Upgrade bidding system for Premium Economy, Business Class, or First Class
+- Interactive text-based bid entry with validation
+- Compare different upgrade classes with pricing and amenities
+- Track current bids across flights and upgrade classes
 
 ### Flight Cancellations
-- **Easy Cancellation**: Cancel flights with confirmation prompts
-- **Refund Information**: Automatic refund processing with timeline information
+
+- Easy cancellation with confirmation prompts
+- Automatic refund processing with timeline information
 
 ## Project Structure
 
 ```
-Flight and Travel Assistant/
+Flight-and-Travel-Assistant/
 ├── lib/
-│   ├── shared/
-│   │   ├── types.ts           # Shared TypeScript interfaces
-│   │   ├── rcsClient.ts       # Pinnacle RCS client configuration
-│   │   └── baseAgent.ts       # Base agent class with common functionality
-│   ├── agent.ts               # Main FlyEasy agent implementation
-│   ├── data.ts                # Mock flight data and configurations
-│   ├── types.ts               # Agent-specific type definitions
-│   └── session.ts             # Session management for user state
-├── router.ts                  # Express router for webhook handling
-├── package.json               # Project dependencies and scripts
-├── tsconfig.json              # TypeScript configuration
-├── .env.example               # Environment variable template
-├── .gitignore                 # Git ignore rules
-└── .prettierrc                # Code formatting rules
+│   ├── types.ts              # Shared TypeScript interfaces
+│   ├── rcsClient.ts          # Pinnacle RCS client configuration
+│   ├── baseAgent.ts          # Base agent class with common functionality
+│   ├── agent.ts              # FlyEasy agent implementation
+│   ├── data.ts               # Mock flight data and configurations
+│   └── session.ts            # Session management for user state
+├── server.ts                 # Main Express server
+├── router.ts                 # Express router for webhook handling
+├── package.json              # Project dependencies
+├── tsconfig.json             # TypeScript configuration
+├── .env.example              # Environment variables template
+└── .gitignore                # Git ignore rules
 ```
 
 ## Setup
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- A Pinnacle API account with RCS enabled
-- ngrok or similar tool for webhook development
+
+- Node.js 18+
+- A Pinnacle API account
+- RCS agent configured in Pinnacle
 
 ### Installation
 
-1. Clone the repository and navigate to the project directory:
-```bash
-cd "Flight and Travel Assistant"
-```
+1. Clone the repository
 
 2. Install dependencies:
-```bash
-npm install
-```
+
+   ```bash
+   npm install
+   ```
 
 3. Create a `.env` file based on `.env.example`:
-```bash
-cp .env.example .env
-```
+
+   ```bash
+   cp .env.example .env
+   ```
 
 4. Configure your environment variables in `.env`:
+
 ```env
 PINNACLE_API_KEY=your_api_key_here
-PINNACLE_AGENT_NAME=your_agent_name_here
-TEST_MODE=true
+PINNACLE_AGENT_ID=your_agent_id_here
+PINNACLE_SIGNING_SECRET=your_signing_secret_here
+TEST_MODE=false
+PORT=3000
+IMAGE_FLYEASY_ICON=your_icon_url
+IMAGE_BOARDING_PASS_QR=your_qr_url
+IMAGE_AMERICAN_AIRLINES_LOGO=your_logo_url
+IMAGE_DELTA_AIRLINES_LOGO=your_logo_url
+IMAGE_UNITED_AIRLINES_LOGO=your_logo_url
+IMAGE_PREMIUM_ECONOMY_SEAT=your_image_url
 ```
 
-5. Update the image URLs in `.env` with your own hosted images or use the provided defaults
+5. Set up a public HTTPS URL for your webhook. For local development, you can use a tunneling service like [ngrok](https://ngrok.com):
+
+   ```bash
+   ngrok http 3000
+   ```
+
+   For production, deploy to your preferred hosting provider.
+
+6. Connect your webhook to your RCS agent:
+
+   - Go to the [Pinnacle Webhooks Dashboard](https://app.pinnacle.sh/dashboard/development/webhooks)
+   - Add your public URL with the `/webhook` path (e.g., `https://your-domain.com/webhook`)
+   - Select your RCS agent to receive messages at this endpoint
+   - Copy the signing secret and add it to your `.env` file as `PINNACLE_SIGNING_SECRET`. The `process()` method uses this environment variable to verify the request signature.
+
+7. Text "MENU", "START", or "SUBSCRIBE" to the bot to see the main menu.
 
 ### Running the Application
 
 Development mode with auto-reload:
+
 ```bash
 npm run dev
 ```
 
 Production mode:
+
 ```bash
 npm start
 ```
 
 Build TypeScript:
+
 ```bash
 npm run build
 ```
 
 Type checking:
+
 ```bash
 npm run type-check
 ```
@@ -104,37 +135,21 @@ npm run type-check
 
 ### Environment Variables
 
-- `PINNACLE_API_KEY`: Your Pinnacle API key (required)
-- `PINNACLE_AGENT_NAME`: Your RCS agent name (required)
-- `TEST_MODE`: Set to `true` for testing, `false` for production
-- `IMAGE_*`: URLs for various images used in the chatbot (logos, icons, QR codes, etc.)
+| Variable                       | Description                                                            | Required            |
+| ------------------------------ | ---------------------------------------------------------------------- | ------------------- |
+| `PINNACLE_API_KEY`             | Your Pinnacle API key                                                  | Yes                 |
+| `PINNACLE_AGENT_ID`            | Your RCS agent ID from Pinnacle Dashboard                              | Yes                 |
+| `PINNACLE_SIGNING_SECRET`      | Webhook signing secret for verification                                | Yes                 |
+| `TEST_MODE`                    | Set to `true` for sending with a test RCS agent to whitelisted numbers | No (default: false) |
+| `PORT`                         | Server port                                                            | No (default: 3000)  |
+| `IMAGE_FLYEASY_ICON`           | Main app icon URL                                                      | No                  |
+| `IMAGE_BOARDING_PASS_QR`       | QR code for boarding passes                                            | No                  |
+| `IMAGE_AMERICAN_AIRLINES_LOGO` | American Airlines logo URL                                             | No                  |
+| `IMAGE_DELTA_AIRLINES_LOGO`    | Delta Airlines logo URL                                                | No                  |
+| `IMAGE_UNITED_AIRLINES_LOGO`   | United Airlines logo URL                                               | No                  |
+| `IMAGE_PREMIUM_ECONOMY_SEAT`   | Premium economy cabin image URL                                        | No                  |
 
-### Image Assets
-
-The following images are used throughout the chatbot:
-- `IMAGE_FLYEASY_ICON`: Main app icon
-- `IMAGE_BOARDING_PASS_QR`: QR code for boarding passes
-- `IMAGE_AMERICAN_AIRLINES_LOGO`: American Airlines logo
-- `IMAGE_DELTA_AIRLINES_LOGO`: Delta Airlines logo
-- `IMAGE_UNITED_AIRLINES_LOGO`: United Airlines logo
-- `IMAGE_PREMIUM_ECONOMY_SEAT`: Premium economy cabin image
-- `IMAGE_BUSINESS_CLASS_DINING`: Business/First class dining image
-
-## Usage
-
-### User Interactions
-
-Users can interact with the chatbot using:
-- **Buttons**: Quick reply buttons for common actions
-- **Text Input**: Text messages for bid amounts during upgrade process
-- **Triggers**: Action-based triggers for navigation and operations
-
-### Main Menu Commands
-
-- Send `MENU`, `START`, or `SUBSCRIBE` to access the main menu
-- Use quick reply buttons to navigate through features
-
-### Conversation Flows
+## Conversation Flows
 
 1. **View Flights**: Main Menu → My Flights → Select Flight → View Options
 2. **Get Boarding Pass**: Main Menu → Get Boarding Pass → View QR Code
@@ -157,27 +172,23 @@ Users can interact with the chatbot using:
 - Bid tracking across multiple flights and classes
 - Text input validation for bid amounts
 
-### Message Types
+## Technologies
 
-The chatbot handles:
-- RCS Text messages
-- RCS Button interactions
-- Trigger payloads with action routing
-- Media messages (images, QR codes)
+- **TypeScript**: Type-safe development
+- **Express**: Web framework for webhook handling
+- **rcs-js**: Pinnacle RCS SDK v2.0.6+
+- **tsx**: TypeScript execution and hot-reload
 
-## Development
+## Support
 
-### Adding New Features
+For issues related to:
 
-1. Define new action types in `lib/shared/types.ts`
-2. Add handler methods in `lib/agent.ts`
-3. Update router cases in `router.ts`
-4. Add mock data in `lib/data.ts` if needed
+- RCS functionality: Contact Pinnacle support
+- Chatbot implementation: Refer to the code documentation
+- Configuration: Check the `.env.example` file
 
-### Testing
+## Resources
 
-Set `TEST_MODE=true` in your `.env` file to enable test mode, which allows testing without sending real messages.
-
-## License
-
-ISC
+- **Dashboard**: Visit [Pinnacle Dashboard](https://app.pinnacle.sh)
+- **Documentation**: Visit [Pinnacle Documentation](https://docs.pinnacle.sh)
+- **Support**: Email [founders@trypinnacle.app](mailto:founders@trypinnacle.app)
