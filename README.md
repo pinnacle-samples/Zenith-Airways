@@ -2,6 +2,10 @@
 
 A comprehensive flight management RCS chatbot that provides travelers with an interactive way to manage their flights, get boarding passes, upgrade seats, and receive notifications through Rich Communication Services (RCS) messaging.
 
+
+https://github.com/user-attachments/assets/3f9f18c5-8181-4429-bbce-32d44a9e4639
+
+
 ## Features
 
 ### Flight Management
