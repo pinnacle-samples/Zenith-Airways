@@ -17,7 +17,7 @@ async function startServer(): Promise<Server> {
       console.info(`Server running on port ${PORT}`);
     });
   } catch (err) {
-    console.error('[FlyEasy] Failed to initialize:', err);
+    console.error('[Zenith Airways] Failed to initialize:', err);
     process.exit(1);
   }
 }

@@ -1,17 +1,5 @@
-// Mock data for FlyEasy demo
+// Mock data for Zenith Airways demo
 import { Flight, Passenger, PassengerFlight, UpgradeOption } from './types';
-import 'dotenv/config';
-
-// Image URLs from environment variables
-export const IMAGES = {
-  FLYEASY_ICON: process.env.IMAGE_FLYEASY_ICON || '',
-  BOARDING_PASS_QR: process.env.IMAGE_BOARDING_PASS_QR || '',
-  AMERICAN_AIRLINES_LOGO: process.env.IMAGE_AMERICAN_AIRLINES_LOGO || '',
-  DELTA_AIRLINES_LOGO: process.env.IMAGE_DELTA_AIRLINES_LOGO || '',
-  UNITED_AIRLINES_LOGO: process.env.IMAGE_UNITED_AIRLINES_LOGO || '',
-  PREMIUM_ECONOMY_SEAT: process.env.IMAGE_PREMIUM_ECONOMY_SEAT || '',
-  BUSINESS_CLASS_DINING: process.env.IMAGE_BUSINESS_CLASS_DINING || '',
-};
 
 // Helper function to format dates
 const getFlightDate = (daysFromNow: number): string => {
@@ -23,10 +11,10 @@ const getFlightDate = (daysFromNow: number): string => {
 // Sample flights
 export const flights: Map<string, Flight> = new Map([
   [
-    'AA245',
+    'ZN245',
     {
-      flightNumber: 'AA245',
-      airline: 'American Airlines',
+      flightNumber: 'ZN245',
+      airline: 'Zenith Airways',
       origin: 'SFO',
       destination: 'JFK',
       departureDate: getFlightDate(0),
@@ -35,15 +23,15 @@ export const flights: Map<string, Flight> = new Map([
       gate: 'B12',
       status: 'delayed',
       delayMinutes: 60,
-      logo: IMAGES.AMERICAN_AIRLINES_LOGO,
+      logo: 'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/logo.png',
       supportPhone: '+18002219750',
     },
   ],
   [
-    'DL512',
+    'ZN512',
     {
-      flightNumber: 'DL512',
-      airline: 'Delta Airlines',
+      flightNumber: 'ZN512',
+      airline: 'Zenith Airways',
       origin: 'JFK',
       destination: 'MIA',
       departureDate: getFlightDate(7),
@@ -51,15 +39,15 @@ export const flights: Map<string, Flight> = new Map([
       boardingTime: '11:00 AM',
       gate: 'C8',
       status: 'on-time',
-      logo: IMAGES.DELTA_AIRLINES_LOGO,
+      logo: 'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/logo.png',
       supportPhone: '+18002211212',
     },
   ],
   [
-    'UA789',
+    'ZN789',
     {
-      flightNumber: 'UA789',
-      airline: 'United Airlines',
+      flightNumber: 'ZN789',
+      airline: 'Zenith Airways',
       origin: 'MIA',
       destination: 'SFO',
       departureDate: getFlightDate(14),
@@ -67,7 +55,7 @@ export const flights: Map<string, Flight> = new Map([
       boardingTime: '8:45 AM',
       gate: 'A22',
       status: 'on-time',
-      logo: IMAGES.UNITED_AIRLINES_LOGO,
+      logo: 'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/logo.png',
       supportPhone: '+18008648331',
     },
   ],
@@ -78,24 +66,24 @@ export const defaultPassenger: Passenger = {
   firstName: 'Alex',
   lastName: 'Johnson',
   bookingReference: 'ABC123',
-  flightNumbers: ['AA245', 'DL512', 'UA789'],
+  flightNumbers: ['ZN245', 'ZN512', 'ZN789'],
   notificationsEnabled: false,
 };
 
 // Default passenger flight details for demo
 export const defaultPassengerFlights: PassengerFlight[] = [
   {
-    flightNumber: 'AA245',
+    flightNumber: 'ZN245',
     seat: '12A',
     boardingGroup: 3,
   },
   {
-    flightNumber: 'DL512',
+    flightNumber: 'ZN512',
     seat: '8C',
     boardingGroup: 2,
   },
   {
-    flightNumber: 'UA789',
+    flightNumber: 'ZN789',
     seat: '15F',
     boardingGroup: 4,
   },
@@ -104,59 +92,65 @@ export const defaultPassengerFlights: PassengerFlight[] = [
 // Upgrade options per flight
 export const flightUpgradeOptions: Map<string, UpgradeOption[]> = new Map([
   [
-    'AA245',
+    'ZN245',
     [
       {
         class: 'Premium Economy',
         minimumBid: 45,
         emoji: '✈️',
         description: 'Extra legroom, priority boarding, complimentary drinks',
-        image: IMAGES.PREMIUM_ECONOMY_SEAT,
+        image:
+          'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/cabin-premium-economy.png',
       },
       {
         class: 'Business Class',
         minimumBid: 110,
         emoji: '🥂',
         description: 'Lie-flat seats, premium dining, lounge access',
-        image: IMAGES.BUSINESS_CLASS_DINING,
+        image:
+          'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/cabin-business-first.png',
       },
     ],
   ],
   [
-    'DL512',
+    'ZN512',
     [
       {
         class: 'Premium Economy',
         minimumBid: 50,
         emoji: '✈️',
         description: 'Extra legroom, priority boarding, complimentary snacks',
-        image: IMAGES.PREMIUM_ECONOMY_SEAT,
+        image:
+          'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/cabin-premium-economy.png',
       },
       {
         class: 'First Class',
         minimumBid: 150,
         emoji: '👑',
         description: 'Full lie-flat seats, gourmet dining, premium lounge',
-        image: IMAGES.BUSINESS_CLASS_DINING,
+        image:
+          'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/cabin-business-first.png',
       },
     ],
   ],
   [
-    'UA789',
+    'ZN789',
     [
       {
         class: 'Premium Economy',
         minimumBid: 40,
         emoji: '✈️',
         description: 'Extra legroom, priority boarding, complimentary drinks',
-        image: IMAGES.PREMIUM_ECONOMY_SEAT,
+        image:
+          'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/cabin-premium-economy.png',
       },
       {
         class: 'Business Class',
         minimumBid: 95,
         emoji: '🥂',
         description: 'Lie-flat seats, premium dining, lounge access',
-        image: IMAGES.BUSINESS_CLASS_DINING,
+        image:
+          'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/cabin-business-first.png',
       },
     ],
   ],
@@ -164,7 +158,7 @@ export const flightUpgradeOptions: Map<string, UpgradeOption[]> = new Map([
 
 // Agent info
 export const agentInfo = {
-  name: 'FlyEasy',
+  name: 'Zenith Airways',
   emoji: '✈️',
   description: 'Your personal flight assistant',
   supportPhone: '+18005551234',

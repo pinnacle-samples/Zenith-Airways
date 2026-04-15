@@ -1,8 +1,14 @@
 import { Router, Request, Response } from 'express';
-import { TriggerPayload } from './lib/types';
+import { rcsClient } from './lib/rcsClient';
 import { agent } from './lib/agent';
 import { sessionManager } from './lib/session';
-import { rcsClient } from './lib/rcsClient';
+import { sendTypingIndicator } from './lib/typing';
+
+
+interface TriggerPayload {
+  action: string;
+  params?: Record<string, unknown>;
+}
 
 const flyEasyRouter = Router();
 
@@ -10,7 +16,8 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
   try {
     const messageEvent = await rcsClient.messages.process(req);
     if (messageEvent.type !== 'MESSAGE.RECEIVED') {
-      return res.status(200).json({ message: 'No message found' });
+      console.error('[Zenith Airways]: User event received', messageEvent);
+      return res.status(200).json({ message: 'User event received' });
     }
     const message = messageEvent.message;
     const from = messageEvent.conversation.from;
@@ -21,6 +28,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
       typeof message.button.raw === 'object' &&
       message.button.raw.type == 'trigger'
     ) {
+      sendTypingIndicator(from);
       const payload: TriggerPayload = JSON.parse(message.button.raw.payload);
 
       // Clear pending bid when user presses any button (except startBidding)
@@ -46,7 +54,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
             await agent.checkFlightStatus(from, payload.params.flightNumber as string);
             return res.status(200).json({ message: 'Flight status sent' });
           }
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -57,7 +65,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
             await agent.cancelFlight(from, payload.params.flightNumber as string);
             return res.status(200).json({ message: 'Cancel flight sent' });
           }
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -68,7 +76,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
             await agent.confirmCancelFlight(from, payload.params.flightNumber as string);
             return res.status(200).json({ message: 'Confirm cancel flight sent' });
           }
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -79,7 +87,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
             await agent.enableNotifications(from, payload.params.flightNumber as string);
             return res.status(200).json({ message: 'Notifications enabled' });
           }
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -90,7 +98,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
             await agent.viewUpgrades(from, payload.params.flightNumber as string);
             return res.status(200).json({ message: 'Upgrades sent' });
           }
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -111,7 +119,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
             );
             return res.status(200).json({ message: 'Bidding started' });
           }
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -126,7 +134,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
           return res.status(200).json({ message: 'No thanks sent' });
 
         default:
-          console.error('[FlyEasy]: Invalid trigger payload', payload);
+          console.error('[Zenith Airways]: Invalid trigger payload', payload);
           return res.status(400).json({
             error: 'Invalid Trigger Payload',
             received: message.button.payload ?? '',
@@ -136,6 +144,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
 
     // Handle text messages
     if (message.type === 'RCS_TEXT') {
+      sendTypingIndicator(from);
       const text = message.text.trim();
 
       if (text === 'MENU' || text === 'START' || text === 'SUBSCRIBE') {
@@ -150,7 +159,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
         // User sent text but isn't in bidding mode - notify them
         await agent.sendStrictFormatMessage(
           from,
-          'Text input is only accepted when placing a bid for flight upgrades.\n\nPlease use the buttons to interact with FlyEasy.',
+          'Text input is only accepted when placing a bid for flight upgrades.\n\nPlease use the buttons to interact with Zenith Airways.',
         );
         return res.status(200).json({
           message: 'Text message outside bidding context, sent notice to user.',
@@ -166,7 +175,7 @@ flyEasyRouter.post('/', async (req: Request, res: Response) => {
       received: message,
     });
   } catch (error) {
-    console.error('[FlyEasy]: Internal server error', error);
+    console.error('[Zenith Airways]: Internal server error', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error',

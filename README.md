@@ -1,198 +1,117 @@
-# FlyEasy - Flight and Travel Assistant
+# Zenith Airways — RCS Flight & Travel Assistant
 
-A comprehensive flight management RCS chatbot that provides travelers with an interactive way to manage their flights, get boarding passes, upgrade seats, and receive notifications through Rich Communication Services (RCS) messaging.
+A flight management chatbot that lives inside RCS. Travelers can view their flights, pull up boarding passes, request bid-style seat upgrades, check flight status, cancel flights, and opt in to proactive notifications — without ever opening an app.
 
+> **Live guide:** https://pinnacle.sh/samples/zenith-airways
 
 https://github.com/user-attachments/assets/3f9f18c5-8181-4429-bbce-32d44a9e4639
 
+> Note: the visuals in this demo recording have since been refreshed with sharper brand assets. The conversation flow is identical to what you'll get from a fresh clone.
 
-## Features
+## What's inside
 
-### Flight Management
+- View upcoming flights as a card carousel
+- Boarding pass card with QR, gate, seat, and boarding time
+- Bid-for-upgrade flow that takes the user from main menu to confirmation in three taps
+- Flight cancellation with confirmation step
+- Per-user session state for multi-step flows
+- Hooks for proactive gate-change and delay alerts
 
-- View all upcoming flights with detailed information
-- Flight number, origin, destination, departure time, gate, and status
-- Real-time flight status updates with delay information
-- Enable notifications for flight status changes
-
-### Boarding Passes
-
-- Digital boarding pass with QR code
-- Seat information and boarding group details
-- Quick access to gate number and boarding time
-
-### Flight Upgrades
-
-- Upgrade bidding system for Premium Economy, Business Class, or First Class
-- Interactive text-based bid entry with validation
-- Compare different upgrade classes with pricing and amenities
-- Track current bids across flights and upgrade classes
-
-### Flight Cancellations
-
-- Easy cancellation with confirmation prompts
-- Automatic refund processing with timeline information
-
-## Project Structure
-
-```
-Flight-and-Travel-Assistant/
-├── lib/
-│   ├── types.ts              # Shared TypeScript interfaces
-│   ├── rcsClient.ts          # Pinnacle RCS client configuration
-│   ├── baseAgent.ts          # Base agent class with common functionality
-│   ├── agent.ts              # FlyEasy agent implementation
-│   ├── data.ts               # Mock flight data and configurations
-│   └── session.ts            # Session management for user state
-├── server.ts                 # Main Express server
-├── router.ts                 # Express router for webhook handling
-├── package.json              # Project dependencies
-├── tsconfig.json             # TypeScript configuration
-├── .env.example              # Environment variables template
-└── .gitignore                # Git ignore rules
-```
-
-## Setup
-
-### Prerequisites
+## Prerequisites
 
 - Node.js 18+
-- A Pinnacle API account
-- RCS agent configured in Pinnacle
+- A Pinnacle account — [sign up](https://app.pinnacle.sh/auth/sign-up)
+- An RCS [test agent](https://docs.pinnacle.sh/guides/branded-test-agents) for development
+- A Pinnacle [API key](https://app.pinnacle.sh/dashboard/development/api-keys) and [webhook signing secret](https://app.pinnacle.sh/dashboard/development/webhooks)
 
-### Installation
+## Quick start
 
-1. Clone the repository
+```bash
+git clone https://github.com/pinnacle-samples/Zenith-Airways
+cd Zenith-Airways
+npm install
+cp .env.example .env
+# fill in PINNACLE_API_KEY, PINNACLE_AGENT_ID, PINNACLE_SIGNING_SECRET
+npm run dev
+```
 
-2. Install dependencies:
+Expose your webhook with [ngrok](https://ngrok.com):
 
-   ```bash
-   npm install
-   ```
+```bash
+ngrok http 3000
+```
 
-3. Create a `.env` file based on `.env.example`:
+Then in the [Pinnacle Webhooks dashboard](https://app.pinnacle.sh/dashboard/development/webhooks):
 
-   ```bash
-   cp .env.example .env
-   ```
+1. Add `https://<your-tunnel-domain>/webhook`
+2. Attach it to your RCS agent
+3. Copy the signing secret into `PINNACLE_SIGNING_SECRET`
 
-4. Configure your environment variables in `.env`:
+Send `MENU` or `START` to your agent — you'll see the Zenith Airways landing card with **My Flights**, **Get Boarding Pass**, **View Upgrades**, and **Cancel Flights**.
+
+## Environment variables
 
 ```env
-PINNACLE_API_KEY=your_api_key_here
+PINNACLE_API_KEY=your_pinnacle_api_key_here
 PINNACLE_AGENT_ID=your_agent_id_here
 PINNACLE_SIGNING_SECRET=your_signing_secret_here
 TEST_MODE=false
 PORT=3000
-IMAGE_FLYEASY_ICON=your_icon_url
-IMAGE_BOARDING_PASS_QR=your_qr_url
-IMAGE_AMERICAN_AIRLINES_LOGO=your_logo_url
-IMAGE_DELTA_AIRLINES_LOGO=your_logo_url
-IMAGE_UNITED_AIRLINES_LOGO=your_logo_url
-IMAGE_PREMIUM_ECONOMY_SEAT=your_image_url
 ```
 
-5. Set up a public HTTPS URL for your webhook. For local development, you can use a tunneling service like [ngrok](https://ngrok.com):
+## Project structure
 
-   ```bash
-   ngrok http 3000
-   ```
-
-   For production, deploy to your preferred hosting provider.
-
-6. Connect your webhook to your RCS agent:
-
-   - Go to the [Pinnacle Webhooks Dashboard](https://app.pinnacle.sh/dashboard/development/webhooks)
-   - Add your public URL with the `/webhook` path (e.g., `https://your-domain.com/webhook`)
-   - Select your RCS agent to receive messages at this endpoint
-   - Copy the signing secret and add it to your `.env` file as `PINNACLE_SIGNING_SECRET`. The `process()` method uses this environment variable to verify the request signature.
-
-7. Text "MENU", "START", or "SUBSCRIBE" to the bot to see the main menu.
-
-### Running the Application
-
-Development mode with auto-reload:
-
-```bash
-npm run dev
+```
+Zenith-Airways/
+├── server.ts              # Express bootstrap
+├── router.ts              # /webhook POST — verifies + dispatches
+└── lib/
+    ├── rcsClient.ts       # PinnacleClient instance
+    ├── baseAgent.ts       # Shared send + typing helpers
+    ├── typing.ts          # Fire-and-forget typing indicator
+    ├── agent.ts           # ZenithAgent — every action handler
+    ├── data.ts            # Flights, upgrade options, agentInfo (brand)
+    ├── session.ts         # Per-user multi-step session state
+    └── types.ts           # Flight, BoardingPass, UpgradeOption
 ```
 
-Production mode:
+## Action handlers
 
-```bash
-npm start
+| Action | What it does |
+| --- | --- |
+| `showMainMenu` | Landing card with all entry points |
+| `viewMyFlights` | Upcoming flights as a card carousel |
+| `getBoardingPass` | Boarding pass card with QR, gate, seat |
+| `checkFlightStatus` | On-time / delay status for a chosen flight |
+| `viewUpgrades` / `startBidding` | Browse and bid on seat upgrades |
+| `viewCancelFlights` / `cancelFlight` / `confirmCancelFlight` | Cancellation flow |
+| `enableNotifications` / `noThanks` | Opt in to proactive alerts |
+
+## Customize the airline brand
+
+`agentInfo` in `lib/data.ts` controls the airline name, tagline, and logo. Swap those fields and the main menu rebrands automatically.
+
+`flights` is a static array per phone number. In production you'll fan out to your reservation system on demand:
+
+```typescript
+async getFlightsByPhone(from: string): Promise<Flight[]> {
+  return await reservationApi.lookupByPhone(from);
+}
 ```
 
-Build TypeScript:
+## Sessions and multi-step flows
 
-```bash
-npm run build
-```
+`lib/session.ts` keeps a small `Map<string, Session>` so the agent remembers what the user was doing across messages — for example, which flight they're upgrading. Replace with Redis when you outgrow a single process.
 
-Type checking:
+## Going to production
 
-```bash
-npm run type-check
-```
-
-## Configuration
-
-### Environment Variables
-
-| Variable                       | Description                                                            | Required            |
-| ------------------------------ | ---------------------------------------------------------------------- | ------------------- |
-| `PINNACLE_API_KEY`             | Your Pinnacle API key                                                  | Yes                 |
-| `PINNACLE_AGENT_ID`            | Your RCS agent ID from Pinnacle Dashboard                              | Yes                 |
-| `PINNACLE_SIGNING_SECRET`      | Webhook signing secret for verification                                | Yes                 |
-| `TEST_MODE`                    | Set to `true` for sending with a test RCS agent to whitelisted numbers | No (default: false) |
-| `PORT`                         | Server port                                                            | No (default: 3000)  |
-| `IMAGE_FLYEASY_ICON`           | Main app icon URL                                                      | No                  |
-| `IMAGE_BOARDING_PASS_QR`       | QR code for boarding passes                                            | No                  |
-| `IMAGE_AMERICAN_AIRLINES_LOGO` | American Airlines logo URL                                             | No                  |
-| `IMAGE_DELTA_AIRLINES_LOGO`    | Delta Airlines logo URL                                                | No                  |
-| `IMAGE_UNITED_AIRLINES_LOGO`   | United Airlines logo URL                                               | No                  |
-| `IMAGE_PREMIUM_ECONOMY_SEAT`   | Premium economy cabin image URL                                        | No                  |
-
-## Conversation Flows
-
-1. **View Flights**: Main Menu → My Flights → Select Flight → View Options
-2. **Get Boarding Pass**: Main Menu → Get Boarding Pass → View QR Code
-3. **Upgrade Seat**: My Flights → Select Flight → Upgrade Options → Place Bid
-4. **Cancel Flight**: Main Menu → Cancel Flights → Select Flight → Confirm
-
-## Technical Details
-
-### Session Management
-
-- Sessions are automatically created for new users
-- Session data includes flights, bids, and notification preferences
-- Sessions expire after 1 hour of inactivity
-- Automatic cleanup of expired sessions
-
-### Bid System
-
-- Users can place bids for seat upgrades
-- Minimum bid amounts are enforced per upgrade class
-- Bid tracking across multiple flights and classes
-- Text input validation for bid amounts
-
-## Technologies
-
-- **TypeScript**: Type-safe development
-- **Express**: Web framework for webhook handling
-- **rcs-js**: Pinnacle RCS SDK v2.0.6+
-- **tsx**: TypeScript execution and hot-reload
-
-## Support
-
-For issues related to:
-
-- RCS functionality: Contact Pinnacle support
-- Chatbot implementation: Refer to the code documentation
-- Configuration: Check the `.env.example` file
+- Set `TEST_MODE=false` and submit your agent for [carrier approval](https://docs.pinnacle.sh/guides/campaigns/rcs)
+- Wire `getFlightsByPhone` to your real reservation system
+- Add proactive notifications by calling `agent.sendMessage(from, ...)` from a cron or queue worker on gate changes / delays
 
 ## Resources
 
-- **Dashboard**: Visit [Pinnacle Dashboard](https://app.pinnacle.sh)
-- **Documentation**: Visit [Pinnacle Documentation](https://docs.pinnacle.sh)
-- **Support**: Email [founders@trypinnacle.app](mailto:founders@trypinnacle.app)
+- **Live guide:** https://pinnacle.sh/samples/zenith-airways
+- **Pinnacle docs:** https://docs.pinnacle.sh/documentation/introduction
+- **Pinnacle dashboard:** https://app.pinnacle.sh
+- **Support:** founders@trypinnacle.app

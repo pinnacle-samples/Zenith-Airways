@@ -1,9 +1,4 @@
-// Type definitions for FlyEasy agent
-
-export interface TriggerPayload {
-  action: string;
-  params?: Record<string, unknown>;
-}
+// Type definitions for Zenith Airways agent
 
 export interface Flight {
   flightNumber: string;

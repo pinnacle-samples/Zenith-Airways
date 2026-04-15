@@ -1,10 +1,10 @@
 import { Pinnacle } from 'rcs-js';
 import { BaseAgent } from './baseAgent';
-import { flights, flightUpgradeOptions, agentInfo, IMAGES } from './data';
+import { flights, flightUpgradeOptions, agentInfo } from './data';
 import { UpgradeBid } from './types';
 import { sessionManager } from './session';
 
-export class FlyAssistAgent extends BaseAgent {
+export class ZenithAgent extends BaseAgent {
   private upgradeBids: Map<string, UpgradeBid> = new Map();
   private pendingBidInputs: Map<string, { flightNumber: string; upgradeClass: string }> = new Map();
 
@@ -17,16 +17,12 @@ export class FlyAssistAgent extends BaseAgent {
         {
           title: `${agentInfo.name} - ${agentInfo.description}.`,
           subtitle: 'Press any button to get started.',
-          media: IMAGES.FLYEASY_ICON,
+          media:
+            'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/logo.png',
           buttons: [],
         },
       ],
       quickReplies: [
-        {
-          type: 'trigger',
-          title: '🔚 End Demo',
-          payload: 'END_DEMO',
-        },
         {
           type: 'trigger',
           title: '✈️ My Flights',
@@ -42,8 +38,12 @@ export class FlyAssistAgent extends BaseAgent {
           title: '❌ Cancel Flights',
           payload: JSON.stringify({ action: 'viewCancelFlights' }),
         },
+        {
+          type: 'trigger',
+          title: '🔚 End Demo',
+          payload: 'END_DEMO',
+        },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -107,7 +107,7 @@ export class FlyAssistAgent extends BaseAgent {
         quickReplies: [
           {
             type: 'call',
-            title: '📞 Call Support',
+            title: 'Call Support',
             payload: '+15125551234',
           },
           {
@@ -116,7 +116,6 @@ export class FlyAssistAgent extends BaseAgent {
             payload: JSON.stringify({ action: 'showMainMenu' }),
           },
         ],
-        options: { test_mode: this.TEST_MODE },
       });
     }
 
@@ -131,7 +130,7 @@ export class FlyAssistAgent extends BaseAgent {
       quickReplies: [
         {
           type: 'call',
-          title: '📞 Call Support',
+          title: 'Call Support',
           payload: supportPhone,
         },
         {
@@ -140,7 +139,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'showMainMenu' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -160,7 +158,6 @@ export class FlyAssistAgent extends BaseAgent {
             payload: JSON.stringify({ action: 'showMainMenu' }),
           },
         ],
-        options: { test_mode: this.TEST_MODE },
       });
     }
 
@@ -198,7 +195,6 @@ export class FlyAssistAgent extends BaseAgent {
           }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -223,7 +219,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'viewMyFlights' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -248,7 +243,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'showMainMenu' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -281,7 +275,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'showMainMenu' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -301,11 +294,10 @@ export class FlyAssistAgent extends BaseAgent {
             payload: JSON.stringify({ action: 'viewMyFlights' }),
           },
         ],
-        options: { test_mode: this.TEST_MODE },
       });
     }
 
-    const cards: Pinnacle.RcsCards.Cards.Item[] = upgradeOptions.map((upgrade) => {
+    const cards: Pinnacle.RichCards.Cards.Item[] = upgradeOptions.map((upgrade) => {
       const currentBid = sessionManager.getCurrentBid(to, flightNumber, upgrade.class);
       const bidText = currentBid ? `Current Bid: $${currentBid}` : `From $${upgrade.minimumBid}`;
 
@@ -335,8 +327,18 @@ export class FlyAssistAgent extends BaseAgent {
         from: this.agentName,
         to: to,
         text: `Here are your available upgrade options for Flight ${flightNumber}:`,
-        quickReplies: [],
-        options: { test_mode: this.TEST_MODE },
+        quickReplies: [
+          {
+            type: 'trigger',
+            title: '🏠 Main Menu',
+            payload: JSON.stringify({ action: 'showMainMenu' }),
+          },
+          {
+            type: 'trigger',
+            title: '🔚 End Demo',
+            payload: 'END_DEMO',
+          },
+        ],
       });
     }
 
@@ -351,7 +353,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'viewMyFlights' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -403,7 +404,6 @@ export class FlyAssistAgent extends BaseAgent {
             payload: JSON.stringify({ action: 'showMainMenu' }),
           },
         ],
-        options: { test_mode: this.TEST_MODE },
       });
     }
 
@@ -418,7 +418,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'showMainMenu' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -444,7 +443,6 @@ export class FlyAssistAgent extends BaseAgent {
           }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -464,7 +462,6 @@ export class FlyAssistAgent extends BaseAgent {
             payload: JSON.stringify({ action: 'showMainMenu' }),
           },
         ],
-        options: { test_mode: this.TEST_MODE },
       });
     }
 
@@ -489,8 +486,18 @@ export class FlyAssistAgent extends BaseAgent {
       from: this.agentName,
       to: to,
       text: `✅ Bid of $${bidAmount} submitted for ${pendingBid.upgradeClass} on Flight ${pendingBid.flightNumber}.\n\nIf your bid is accepted, you'll pay for the upgrade at the check-in desk before departure.`,
-      quickReplies: [],
-      options: { test_mode: this.TEST_MODE },
+      quickReplies: [
+        {
+          type: 'trigger',
+          title: '🏠 Main Menu',
+          payload: JSON.stringify({ action: 'showMainMenu' }),
+        },
+        {
+          type: 'trigger',
+          title: '🔚 End Demo',
+          payload: 'END_DEMO',
+        },
+      ],
     });
 
     // Send upgrade cards again to show updated bid (skip intro text)
@@ -516,7 +523,6 @@ export class FlyAssistAgent extends BaseAgent {
             payload: JSON.stringify({ action: 'showMainMenu' }),
           },
         ],
-        options: { test_mode: this.TEST_MODE },
       });
     }
 
@@ -528,8 +534,18 @@ export class FlyAssistAgent extends BaseAgent {
         from: this.agentName,
         to: to,
         text: 'Flight not found.',
-        quickReplies: [],
-        options: { test_mode: this.TEST_MODE },
+        quickReplies: [
+          {
+            type: 'trigger',
+            title: '🏠 Main Menu',
+            payload: JSON.stringify({ action: 'showMainMenu' }),
+          },
+          {
+            type: 'trigger',
+            title: '🔚 End Demo',
+            payload: 'END_DEMO',
+          },
+        ],
       });
     }
 
@@ -538,15 +554,26 @@ export class FlyAssistAgent extends BaseAgent {
       from: this.agentName,
       to: to,
       text: `🎟️ Boarding Pass for Flight ${flight.flightNumber}\n\n${flight.origin} → ${flight.destination}\n${flight.departureDate} • ${flight.departureTime}\n\nSeat: ${passengerFlight.seat}\nBoarding Group: ${passengerFlight.boardingGroup}\nBoarding Time: ${flight.boardingTime}\nGate: ${flight.gate}`,
-      quickReplies: [],
-      options: { test_mode: this.TEST_MODE },
+      quickReplies: [
+        {
+          type: 'trigger',
+          title: '🏠 Main Menu',
+          payload: JSON.stringify({ action: 'showMainMenu' }),
+        },
+        {
+          type: 'trigger',
+          title: '🔚 End Demo',
+          payload: 'END_DEMO',
+        },
+      ],
     });
 
     // Send QR code as media
     return await this.client.messages.rcs.send({
       from: this.agentName,
       to: to,
-      media: IMAGES.BOARDING_PASS_QR,
+      media:
+        'https://server.trypinnacle.app/storage/v1/object/public/pinnacle-public-assets/ARC/zenith-airways/boarding-pass-qr.png',
       quickReplies: [
         {
           type: 'trigger',
@@ -559,7 +586,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'showMainMenu' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -581,7 +607,6 @@ export class FlyAssistAgent extends BaseAgent {
           payload: JSON.stringify({ action: 'showMainMenu' }),
         },
       ],
-      options: { test_mode: this.TEST_MODE },
     });
   }
 
@@ -619,7 +644,6 @@ export class FlyAssistAgent extends BaseAgent {
               }),
             },
           ],
-          options: { test_mode: this.TEST_MODE },
         });
       }
 
@@ -631,4 +655,4 @@ export class FlyAssistAgent extends BaseAgent {
   }
 }
 
-export const agent = new FlyAssistAgent();
+export const agent = new ZenithAgent();
